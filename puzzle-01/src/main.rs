@@ -18,11 +18,19 @@ fn main() -> io::Result<()> {
     // iterate over lines in reader
     for line_result in reader.lines() {
         let line = line_result?;
-
         // get direction (first char)
         let direction = line.chars().nth(0).unwrap();
         // get amount to rotate
-        let amount: u8 = (line[1..].parse::<u16>().unwrap_or(0) % 100) as u8;
+        let full_amount: u16 = line[1..].parse::<u16>().unwrap();
+        // get num of full rotations
+        let num_rotations = full_amount / 100;
+        // increment count_0 for each full rotation
+        if num_rotations >= 1 {
+            count_0 += num_rotations;
+        }
+        // check the amount the dial moves to new position
+        let amount = (full_amount % 100) as u8;
+
         // check forward or backwards rotation
         if direction == 'L' {
             // if rotating backwards ('L')
@@ -31,6 +39,10 @@ fn main() -> io::Result<()> {
             // check if passing 0
             if new_dial_pos < 0 {
                 // if passing 0, subtract remainder from 100
+                // if dial not exactly on 0, increment count
+                if dial_pos != 0 {
+                    count_0 += 1;
+                }
                 dial_pos = 100 - new_dial_pos.abs() as u8;
             } else {
                 dial_pos = new_dial_pos as u8;
@@ -43,6 +55,10 @@ fn main() -> io::Result<()> {
             if new_dial_pos > 99 {
                 // if passing 100, subtract 100
                 dial_pos = new_dial_pos - 100;
+                // if dial is not exactly on 0, increment count
+                if dial_pos != 0 {
+                    count_0 += 1;
+                }
             } else {
                 dial_pos = new_dial_pos;
             }
@@ -54,7 +70,7 @@ fn main() -> io::Result<()> {
         }
     }
 
-    println!("Number of times the dial ended up on 0: {count_0}");
+    println!("Number of times the dial ended up on, or passed 0: {count_0}");
 
     Ok(())
 }
